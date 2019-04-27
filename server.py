@@ -29,14 +29,15 @@ def ipv6_server(sockaddr):
     while True:  # answer a single request
         conn, addr = s.accept()
         print("Got connection from", addr)
-        # data = conn.recv(1024)
-        data = "Response present"
-        conn.send(data)
+        data = conn.recv(1024)
+        response = "Got This: " + data.decode()
+        response = response.encode()
+        conn.send(response)
     print("the socket has successfully connected/n")
     conn.close()
 
 def main():
-    x = raw_input('Enter ip address:')
+    x = input('Enter ip address:')
     server_socket = fetch_local_ipv6_address(x,10008)
     ipv6_server(server_socket)
 
