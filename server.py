@@ -38,6 +38,7 @@ def ipv6_server(sockaddr):
 
 def main():
     x = input('Enter ip address:')
+    # use IPv6:MeshLocalAddress
     server_socket = fetch_local_ipv6_address(x,10008)
     ipv6_server(server_socket)
 
