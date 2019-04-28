@@ -27,6 +27,7 @@ def convertNametoIPv6(node_name):
           else:
               return "::1", False
 
+
 def parseRequest(user_request):
     """
     Takes user input and splits it up into the command,
@@ -36,21 +37,20 @@ def parseRequest(user_request):
     returns:
       command action system is to take
       node_name target node of action
-      path location of file
+      paths locations of files
     """
-    
+
     args = user_request.strip().split(' ')
     command = None
     node_name = None
-    path = None
-    if(len(args) > 0):
+    paths = None
+    if (len(args) > 0):
         command = args[0]
-        if(len(args) > 1):
+        if (len(args) > 1):
             node_name = args[1]
-            if(len(args) > 2):
-                path = args[2]
-    return command, node_name, path
-
+            if (len(args) > 2):
+                paths = args[2:]
+    return command, node_name, paths
 
 def fetch_local_ipv6_address(IP_address, port):
     """
@@ -84,34 +84,34 @@ def ReceiveFile(sock, path):
         if data[:6] == "EXISTS":
             filesize = int(data[6:])
             # print(filesize)
-            msg = input("File found: " + str(filesize)+ " bytes. Download? (Y?N): ")
             cur_time = time.time()
-            if msg == "Y":
-                sock.send("OK".encode())
-                # fileToOpen = os.path.join(path)
-                f = open("new_" + filename, "wb")
+
+            sock.send("OK".encode())
+            # fileToOpen = os.path.join(path)
+            f = open("new_" + filename, "wb")
+            data = sock.recv(1024).decode()
+            totalRecv = len(data)
+            # print("initial: ", totalRecv, filesize)
+            f.write(data.encode())
+            while totalRecv < filesize: # never uses this loop
+                # print(totalRecv, filesize)
                 data = sock.recv(1024).decode()
-                totalRecv = len(data)
-                # print("initial: ", totalRecv, filesize)
+                totalRecv += len(data)
                 f.write(data.encode())
-                while totalRecv < filesize: # never uses this loop
-                    # print(totalRecv, filesize)
-                    data = sock.recv(1024).decode()
-                    totalRecv += len(data)
-                    f.write(data.encode())
-                    print("{0:.2f}".format((totalRecv/(float)(filesize))*100)+"% done")
-                print("Download complete, file ready!")
-                final_time = time.time()
-                #round trip time  
-                rtt = str(final_time-cur_time)
-                print("Round trip time is" + rtt)
+                print("{0:.2f}".format((totalRecv/(float)(filesize))*100)+"% done")
+            print("Download complete, file ready!")
+            final_time = time.time()
+            #round trip time
+            rtt = str(final_time-cur_time)
+            print("> [" + path + "]" + " Round trip time is " + rtt + " seconds")
         else:
             # print("The file you requested does not exist!")
             print("No such file '{}'".format(path), file=sys.stderr)
     
     sock.close()
-    
-def ipv6_client(sockaddr, path):
+
+
+def ipv6_client(sockaddr, paths, path_counter):
     """
         Echo client program
         use hostname or port number or use 'sockaddr' to open the connection
@@ -123,26 +123,27 @@ def ipv6_client(sockaddr, path):
     s.connect(sockaddr)
 
     print("client opened socket connection:", s.getsockname())
-    ReceiveFile(s, path)
+    ReceiveFile(s, paths[path_counter])
 
     
 def main():
     # print("sample")
     user_input = input('/> ')
-    command, node_name, path = parseRequest(user_input)
+    command, node_name, paths = parseRequest(user_input)
 
     if(command != None):
         if(command == "get") or (command == "GET"):
-            if(node_name != None) and (path != None):
+            if(node_name != None) and (paths != None):
                 try:
                     target_ip, status = convertNametoIPv6(node_name)
                     # fetch the local IPv6 address
                     local_ipv6_addr = fetch_local_ipv6_address(target_ip,10008)
-                    '''t = threading.Thread(target=test_server.ipv6_server, args=(local_ipv6_addr,))
-                    t.start()'''
-
-                    time.sleep(1)
-                    ipv6_client(local_ipv6_addr, path)
+                    path_counter = 0
+                    while path_counter < len(paths):
+                        t = threading.Thread(target=ipv6_client, args=(local_ipv6_addr,paths,path_counter))
+                        t.start()
+                        path_counter += 1
+                    t.join()
 
                 except Exception as e:
                     print("Error occurred: ", e)

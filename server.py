@@ -63,6 +63,7 @@ def ipv6_server(sockaddr):
         print("Got connection from", addr)
         t = threading.Thread(target=SendFile, args=("sendFileThread", conn))
         t.start()
+    t.join()
     print("the socket has successfully connected/n")
     conn.close()
 
