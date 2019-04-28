@@ -1,11 +1,11 @@
 #!/usr/bin/python
-from Crypto.Cipher import AES
-from Crypto.Hash import SHA256
-from Crypto import Random
+#from Crypto.Cipher import AES
+#from Crypto.Hash import SHA256
+#from Crypto import Random
 import socket
 import threading
 import time
-import os
+#import os
 import sys
 
 password = "MPM2019"
@@ -74,7 +74,8 @@ def fetch_local_ipv6_address(IP_address, port):
     entry0 = addrs[0]
     sockaddr = entry0[-1]
     return sockaddr
-    
+
+'''
 def decryption(encryptedString):
 	PADDING = '{'
 	DecodeAES = lambda c, e: c.decrypt(base64.b64decode(e)).rstrip(PADDING)
@@ -84,9 +85,11 @@ def decryption(encryptedString):
 	key = ''
 	cipher = AES.new(key)
 	decoded = DecodeAES(cipher, encryption)
-	print (decoded)
+	print(decoded)
     return decoded
-    
+'''
+
+'''
 def decrypt(key, filename):
     chunksize = 64*1024
     outputfile = "decrypted_" + filename[11:]
@@ -107,11 +110,13 @@ def decrypt(key, filename):
                 outfile.write(decryptor.decrypt(chunk))
                 
             outfile.truncate(filesize)
+'''
 
+'''
 def getKey(password):
     hasher = SHA256.new(password.encode())
     return hasher.digest()
-    
+'''
     
 def ReceiveFile(sock, path):
     """
@@ -120,7 +125,7 @@ def ReceiveFile(sock, path):
     
     pathList = path.split("/")
     filename = pathList[-1]
-    decrypt(getKey(password), filename)
+    #decrypt(getKey(password), filename)
     if path != "q":
         sock.send(path.encode())
         data = sock.recv(1024).decode()

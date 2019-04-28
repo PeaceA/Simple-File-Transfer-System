@@ -1,12 +1,12 @@
-from Crypto.Cipher import AES
-from Crypto.Hash import SHA256
-from Crypto import Random
-import base64
+#from Crypto.Cipher import AES
+#from Crypto.Hash import SHA256
+#from Crypto import Random
+#import base64
 import socket  
 import threading
 import time
 import os
-import sys
+#import sys
 
 password = "MPM2019"
 
@@ -27,11 +27,12 @@ def fetch_local_ipv6_address(IP_address, port):
     entry0 = addrs[0]
     sockaddr = entry0[-1]
     return sockaddr
-    
+
+'''
 def encrypt(key, filename):
     chunksize = 64*1024
     outputfile = "encrypted_" + filename
-    filesize = str(os.path.getsize(gilename)).zfill(16)
+    filesize = str(os.path.getsize(filename)).zfill(16)
     IV = Random.new().read(16)
     
     encryptor = AES.new(key, AES.MODE_CBC, IV)
@@ -49,11 +50,14 @@ def encrypt(key, filename):
                     chunk += b" " * (16 - (len(chunk) % 16))
                     
                 outfile.write(encryptor.encrypt(chunk))
+'''
 
+'''
 def getKey(password):
     hasher = SHA256.new(password.encode())
     return hasher.digest()
-    
+'''
+
 def SendFile(name, sock):
     """ 
         send the file from the requested path to the client
@@ -66,7 +70,7 @@ def SendFile(name, sock):
         sock.send(result.encode()) #send result as bytes
         userResponse = (sock.recv(1024)).decode() #receive userResponse and decode to get str repr
         if userResponse[:2] == "OK":
-            encrypt(getKey(password), filename)
+            #encrypt(getKey(password), filename)
             with open(filename.encode(), "rb") as f:
                 bytesToSend = f.read(1024)
                 sock.send(bytesToSend)
