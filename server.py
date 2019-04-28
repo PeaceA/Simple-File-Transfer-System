@@ -68,16 +68,17 @@ def ipv6_server(sockaddr):
     conn.close()
 
 
-"""
-Takes a node name and translates it to an IPv6 address for
-routing purposes.
-args:
-  node_name - string; user friendly name of destination node
-returns:
-  IPv6 address of related node
-  isValid flag if node name is recognized
-"""
 def convertNametoIPv6(node_name):
+    """
+    Takes a node name and translates it to an IPv6 address for
+    routing purposes.
+    args:
+      node_name - string; user friendly name of destination node
+    returns:
+      IPv6 address of related node
+      isValid flag if node name is recognized
+    """
+    
     if(node_name == "mahia") or (node_name == "MAHIA"):
         return "fdf4:abfb:707:0:38d9:b7d9:8395:21df", True
     else:
