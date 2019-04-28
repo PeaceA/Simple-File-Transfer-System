@@ -26,7 +26,7 @@ def SendFile(name, sock):
     """ 
         send the file from the requested path to the client
     """
-    filename =  (sock.recv(1024)).decode() #receive filename and decode to get str repr
+    filename = (sock.recv(1024)).decode() #receive filename and decode to get str repr
     print("fileName:", filename)
     if os.path.isfile(filename):
         result = "EXISTS " + str(os.path.getsize(filename))
@@ -66,13 +66,34 @@ def ipv6_server(sockaddr):
     print("the socket has successfully connected/n")
     conn.close()
 
+
+"""
+Takes a node name and translates it to an IPv6 address for
+routing purposes.
+args:
+  node_name - string; user friendly name of destination node
+returns:
+  IPv6 address of related node
+  isValid flag if node name is recognized
+"""
+def convertNametoIPv6(node_name):
+    if(node_name == "mahia") or (node_name == "MAHIA"):
+        return "fdf4:abfb:707:0:38d9:b7d9:8395:21df", True
+    else:
+        if(node_name == "peace") or (node_name == "PEACE"):
+            return "fdf4:abfb:707:0:10:b1e7:8a56:be8", True
+        else:
+            if(node_name == "king") or (node_name == "KING"):
+                return "fdf4:abfb:707:0:c8ad:b3ca:3222:cf90", True
+            else:
+                return "::1", False
+
+
 def main():
-    x = input('Enter ip address:')
+    node_name = input('Device name? (peace | mahia | king | test): ')
     # use IPv6:MeshLocalAddress
-    server_socket = fetch_local_ipv6_address(x,10008)
+    node_address, status = convertNametoIPv6(node_name)
+    server_socket = fetch_local_ipv6_address(node_address,10008)
     ipv6_server(server_socket)
 
 main()
-
-
-        
