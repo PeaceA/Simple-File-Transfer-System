@@ -80,10 +80,10 @@ def ReceiveFile(sock, path):
     if path != "q":
         sock.send(path.encode())
         data = sock.recv(1024).decode()
-        print(data[:6])
+        # print(data[:6])
         if data[:6] == "EXISTS":
             filesize = int(data[6:])
-            print(filesize)
+            # print(filesize)
             msg = input("File found: " + str(filesize)+ " bytes. Download? (Y?N): ")
             cur_time = time.time()
             if msg == "Y":
@@ -92,10 +92,10 @@ def ReceiveFile(sock, path):
                 f = open("new_" + filename, "wb")
                 data = sock.recv(1024).decode()
                 totalRecv = len(data)
-                print("initial: ", totalRecv, filesize) 
+                # print("initial: ", totalRecv, filesize)
                 f.write(data.encode())
                 while totalRecv < filesize: # never uses this loop
-                    print(totalRecv, filesize)
+                    # print(totalRecv, filesize)
                     data = sock.recv(1024).decode()
                     totalRecv += len(data)
                     f.write(data.encode())
@@ -127,7 +127,7 @@ def ipv6_client(sockaddr, path):
 
     
 def main():
-    print("sample")
+    # print("sample")
     user_input = input('/> ')
     command, node_name, path = parseRequest(user_input)
 
