@@ -103,7 +103,7 @@ def ReceiveFile(sock, path):
                 print("Download complete, file ready!")
                 final_time = time.time()
                 #round trip time  
-                rtt = str(cur_time-final_time)
+                rtt = str(final_time-cur_time)
                 print("Round trip time is" + rtt)
         else:
             # print("The file you requested does not exist!")
