@@ -1,9 +1,14 @@
 #!/usr/bin/python
+from Crypto.Cipher import AES
+from Crypto.Hash import SHA256
+from Crypto import Random
 import socket
 import threading
 import time
 import os
 import sys
+
+password = "MPM2019"
 
 def convertNametoIPv6(node_name):
     """
@@ -69,7 +74,45 @@ def fetch_local_ipv6_address(IP_address, port):
     entry0 = addrs[0]
     sockaddr = entry0[-1]
     return sockaddr
+    
+def decryption(encryptedString):
+	PADDING = '{'
+	DecodeAES = lambda c, e: c.decrypt(base64.b64decode(e)).rstrip(PADDING)
+	#Key is FROM the printout of 'secret' in encryption
+	#below is the encryption.
+	encryption = encryptedString
+	key = ''
+	cipher = AES.new(key)
+	decoded = DecodeAES(cipher, encryption)
+	print (decoded)
+    return decoded
+    
+def decrypt(key, filename):
+    chunksize = 64*1024
+    outputfile = "decrypted_" + filename[11:]
+    
+    with open(filename, "rb") as infile:
+        filesize = int(infile.read(16))
+        IV = infile.read(16)
+        
+        decryptor = AES.new(key, AES.MODE_CBC, IV)
+        
+        with open(outputfile, "wb") as outfile:
+            while True:
+                chunk = infile.read(chunksize)
+                
+                if len(chunk) == 0:
+                    break
+                
+                outfile.write(decryptor.decrypt(chunk))
+                
+            outfile.truncate(filesize)
 
+def getKey(password):
+    hasher = SHA256.new(password.encode())
+    return hasher.digest()
+    
+    
 def ReceiveFile(sock, path):
     """
         Receive the file sent by the server to the current directory
@@ -77,6 +120,7 @@ def ReceiveFile(sock, path):
     
     pathList = path.split("/")
     filename = pathList[-1]
+    decrypt(getKey(password), filename)
     if path != "q":
         sock.send(path.encode())
         data = sock.recv(1024).decode()
@@ -85,13 +129,14 @@ def ReceiveFile(sock, path):
             filesize = int(data[6:])
             # print(filesize)
             cur_time = time.time()
-
             sock.send("OK".encode())
             # fileToOpen = os.path.join(path)
             f = open("new_" + filename, "wb")
+        
             data = sock.recv(1024).decode()
             totalRecv = len(data)
             # print("initial: ", totalRecv, filesize)
+           
             f.write(data.encode())
             while totalRecv < filesize: # never uses this loop
                 # print(totalRecv, filesize)
