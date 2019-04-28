@@ -1,10 +1,14 @@
 import socket  
 import threading
 import time
+import os
+import sys
 
 def fetch_local_ipv6_address(IP_address, port):
-    # try to detect whether IPv6 is supported at the present system and
-    # fetch the IPv6 address of localhost.
+    """
+        try to detect whether IPv6 is supported at the present system and
+        fetch the IPv6 address of localhost.
+    """
     if not socket.has_ipv6:
         raise Exception("the local machine has no IPv6 support enabled")
 
@@ -18,8 +22,36 @@ def fetch_local_ipv6_address(IP_address, port):
     sockaddr = entry0[-1]
     return sockaddr
 
+def SendFile(name, sock):
+    """ 
+        send the file from the requested path to the client
+    """
+    filename =  (sock.recv(1024)).decode() #receive filename and decode to get str repr
+    print("fileName:", filename)
+    if os.path.isfile(filename):
+        result = "EXISTS " + str(os.path.getsize(filename))
+        # print(result)
+        sock.send(result.encode()) #send result as bytes
+        userResponse = (sock.recv(1024)).decode() #receive userResponse and decode to get str repr
+        if userResponse[:2] == "OK":
+            with open(filename.encode(), "rb") as f:
+                bytesToSend = f.read(1024)
+                sock.send(bytesToSend)
+                while bytesToSend.decode() != "": #doesn't usually reach
+                    bytesToSend = f.read(1024)
+                    # print(bytesToSend.decode(), "tick")
+                    sock.send(bytesToSend)
+    else:
+        err_msg = "ERR"
+        err_msg_bytes = err_msg.encode()
+        sock.send(err_msg_bytes)
+        
+    sock.close()
+    
 def ipv6_server(sockaddr):
-    # Echo server program
+    """
+        Echo server program
+    """
     s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
     s.bind(sockaddr)
     s.listen(1)
@@ -29,10 +61,8 @@ def ipv6_server(sockaddr):
     while True:  # answer a single request
         conn, addr = s.accept()
         print("Got connection from", addr)
-        data = conn.recv(1024)
-        response = "Got This: " + data.decode()
-        response = response.encode()
-        conn.send(response)
+        t = threading.Thread(target=SendFile, args=("sendFileThread", conn))
+        t.start()
     print("the socket has successfully connected/n")
     conn.close()
 
@@ -44,3 +74,5 @@ def main():
 
 main()
 
+
+        
