@@ -85,6 +85,7 @@ def ReceiveFile(sock, path):
             filesize = int(data[6:])
             print(filesize)
             msg = input("File found: " + str(filesize)+ " bytes. Download? (Y?N): ")
+            cur_time = time.time()
             if msg == "Y":
                 sock.send("OK".encode())
                 # fileToOpen = os.path.join(path)
@@ -100,6 +101,10 @@ def ReceiveFile(sock, path):
                     f.write(data.encode())
                     print("{0:.2f}".format((totalRecv/(float)(filesize))*100)+"% done")
                 print("Download complete, file ready!")
+                final_time = time.time()
+                #round trip time  
+                rtt = str(cur_time-final_time)
+                print("Round trip time is" + rtt)
         else:
             # print("The file you requested does not exist!")
             print("No such file '{}'".format(path), file=sys.stderr)
